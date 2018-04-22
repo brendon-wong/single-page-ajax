@@ -1,10 +1,16 @@
+function hasNumber(myString) {
+  // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+  // regex tests myString for \d, any digit 0–9
+  return /\d/.test(myString);
+}
+
 function loadData() {
   
     // Dollar signs are merely used to indicate that an object is a jQuery object
     //var $wikiElem = $('#wikipedia-links');
 
     // clear out old data before new request
-    //$wikiElem.text("");
+    $('#wikipedia-links').text("");
     //$nytElem.text("");
     
     // Google Streetview API
@@ -13,7 +19,8 @@ function loadData() {
     // then append an img tag with the request url to the HTML body
     var street = $("#street").val();
     var city = $("#city").val();
-    var google_url = "http://maps.googleapis.com/maps/api/streetview?size=12000x600&location=" + street + ", " + city;
+    var google_url = "http://maps.googleapis.com/maps/api/streetview?size=12000x600&location=" + 
+    street + ", " + city;
     $('body').append('<img class="bgimg" src="' + google_url + '">');
     
     // update greeting text
@@ -32,6 +39,45 @@ function loadData() {
     }
     $('#greeting').text("Current location: " + location)
     
+    // Wikipedia/MediaWiki API, accessed with JSONP (JSON with Padding)
+    // The server returns JSON data in the function call, which is sent tp client
+    
+    var wiki_search;
+    if (street && city) {
+      if (hasNumber(street)) {
+        wiki_search = city;
+      }
+      else {
+        wiki_search = city;
+      }
+    }
+    else if (street) {
+      wiki_search = street;
+    }
+    else if (city) {
+      wiki_search = city;
+    }
+    
+    $.ajax({
+      url: 'https:////en.wikipedia.org/w/api.php',
+      data: {
+        action: 'query',
+        list: 'search',
+        srsearch: wiki_search, //'Great Pyramid',
+        format: 'json',
+      },
+      dataType: 'jsonp',
+      success: function (data) {
+        console.log(data);
+        for (var i = 0; i < 5; i++) {
+          var article = data.query.search[i];
+          $('#wikipedia-links').append(
+            '<ul id= "wikipedia-links"><a target="_blank" href="' + 
+            "https://en.wikipedia.org/wiki/" + article.title + '">' + 
+            article.title + '</a></ul>');
+        }
+      }
+    });
     return false;
 };
 
@@ -49,7 +95,7 @@ nyt_url += '?' + $.param({
 $.getJSON(nyt_url, function(data) {
   $('#nytimes-header').text("Latest New York Times Articles");
   // Results is an array of article objects inside the response object "data"
-  articles = data.results
+  articles = data.results;
   // set i < articles.length to display all articles
   for (var i = 0; i < 5; i++) {
     var article = articles[i]
