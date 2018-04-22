@@ -1,23 +1,20 @@
-
 function loadData() {
-
+  
     // Dollar signs are merely used to indicate that an object is a jQuery object
-    var $body = $('body');
-    var $wikiElem = $('#wikipedia-links');
-    var $nytHeaderElem = $('#nytimes-header');
-    var $nytElem = $('#nytimes-articles');
-    var $greeting = $('#greeting');
+    //var $wikiElem = $('#wikipedia-links');
 
     // clear out old data before new request
-    $wikiElem.text("");
-    $nytElem.text("");
+    //$wikiElem.text("");
+    //$nytElem.text("");
+    
+    // Google Streetview API
 
     // create Google Streetview request url from user inputted street and city,
     // then append an img tag with the request url to the HTML body
     var street = $("#street").val();
     var city = $("#city").val();
-    var google_request_url = "http://maps.googleapis.com/maps/api/streetview?size=12000x600&location=" + street + ", " + city;
-    $body.append('<img class="bgimg" src="' + google_request_url + '">');
+    var google_url = "http://maps.googleapis.com/maps/api/streetview?size=12000x600&location=" + street + ", " + city;
+    $('body').append('<img class="bgimg" src="' + google_url + '">');
     
     // update greeting text
     var location;
@@ -30,9 +27,36 @@ function loadData() {
     else if (city) {
       location = city;
     }
-    $greeting.text("Current location: " + location)
-
+    else {
+      location = "unspecified"
+    }
+    $('#greeting').text("Current location: " + location)
+    
     return false;
 };
 
 $('#form-container').submit(loadData);
+
+// NYTimes API (note: currently refreshed on every submit, but this isn't necessary)
+
+// Construct URL with API Key
+// Brendon's API Key: efbb8eea500b42d9ba1ef7e42eb548bc
+var nyt_url = "https://api.nytimes.com/svc/topstories/v2/home.json";
+nyt_url += '?' + $.param({
+  'api-key': "efbb8eea500b42d9ba1ef7e42eb548bc"
+});
+
+$.getJSON(nyt_url, function(data) {
+  $('#nytimes-header').text("Latest New York Times Articles");
+  // Results is an array of article objects inside the response object "data"
+  articles = data.results
+  // set i < articles.length to display all articles
+  for (var i = 0; i < 5; i++) {
+    var article = articles[i]
+    $('#nytimes-articles').append(
+      '<ul id= "article">' + '<a target="_blank" href="' + article.url + '">' + 
+      article.title + '</a>' + '<p>' + article.abstract + '</p>' + '</ul>');
+  };
+}).error(function() {
+  $('#nytimes-header').text("Could Not Load Latest New York Times Articles");
+});
