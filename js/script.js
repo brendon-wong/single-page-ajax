@@ -58,6 +58,11 @@ function loadData() {
       wiki_search = city;
     }
     
+    // Error handling for Wikipedia
+    var wikiRequestTimeout = setTimeout(function() {
+      $('#wikipedia-header').text("Could Not Load Wikipedia Links");
+    }, 8000);
+    
     $.ajax({
       url: 'https:////en.wikipedia.org/w/api.php',
       data: {
@@ -76,6 +81,9 @@ function loadData() {
             "https://en.wikipedia.org/wiki/" + article.title + '">' + 
             article.title + '</a></ul>');
         }
+        // Stop error handling
+        clearTimeout(wikiRequestTimeout)
+        $('#wikipedia-header').text("Relevant Wikipedia Links");
       }
     });
     return false;
