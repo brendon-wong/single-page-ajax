@@ -19,7 +19,8 @@ function loadData() {
     // then append an img tag with the request url to the HTML body
     var street = $("#street").val();
     var city = $("#city").val();
-    var google_url = "http://maps.googleapis.com/maps/api/streetview?size=12000x600&location=" + 
+    // Adjust Streetview API request to use maximum available resolution
+    var google_url = "http://maps.googleapis.com/maps/api/streetview?size=640x640&location=" + 
     street + ", " + city;
     $('body').append('<img class="bgimg" src="' + google_url + '">');
     
